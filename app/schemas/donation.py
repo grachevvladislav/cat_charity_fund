@@ -18,7 +18,6 @@ class DonationCreate(DonationBase):
 
 class DonationShortDB(DonationBase):
     id: int
-    create_data: datetime
 
     class Config:
         orm_mode = True
@@ -26,9 +25,8 @@ class DonationShortDB(DonationBase):
 
 class DonationFullDB(DonationShortDB):
     user_id: int
-    invested_amount: int
     fully_invested: bool
-    close_date: datetime
+    close_date: Optional[datetime]
 
     class Config(DonationBase.Config):
         pass

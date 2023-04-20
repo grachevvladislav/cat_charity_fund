@@ -12,9 +12,9 @@ class CRUDDonation(CRUDBase):
             self,
             user: User,
             session: AsyncSession,
-    ) -> Optional[List[Donation]]:
+    ):
         user_donations = await session.execute(
-            select(Donation.id).where(
+            select(Donation).where(
                 Donation.user_id == user.id
             )
         )
