@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Text, Integer
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text
 
 from .dase import CharityDonationBase
 
