@@ -18,9 +18,12 @@ class CharityProjectCreate(CharityProjectBase):
 
 
 class CharityProjectUpdate(CharityProjectBase):
-    name: Optional[str] = Field(..., min_length=1, max_length=100)
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
     description: Optional[str]
     full_amount: Optional[PositiveInt]
+    fully_invested: Optional[bool]
+    invested_amount: Optional[PositiveInt]
+    close_date: Optional[datetime]
 
 
 class CharityProjectDB(CharityProjectBase):

@@ -1,11 +1,10 @@
-from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
-from app.models import CharityProject, User
+from app.models import CharityProject
 
 
 class CRUDCharityProjects(CRUDBase):
