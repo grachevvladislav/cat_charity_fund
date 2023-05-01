@@ -12,8 +12,8 @@ from app.schemas.charity_project import (CharityProjectCreate,
 
 from ..validators import (check_charity_project_exists,
                           check_charity_project_not_invested,
-                          check_project_is_close, check_project_name,
-                          check_project_name_duplicate)
+                          check_full_great_invested, check_project_is_close,
+                          check_project_name_description, check_project_name_duplicate)
 
 router = APIRouter()
 
@@ -45,7 +45,7 @@ async def create_new_charity_project(
 
     Создает благотворительный проект.
     """
-    check_project_name(charity_project.name)
+    check_project_name_description(charity_project)
     await check_project_name_duplicate(charity_project.name, session)
     new_charity_project = await charity_projects_crud.create(
         charity_project, session
@@ -98,9 +98,11 @@ async def partially_update_charity_project(
         charity_project_id, session
     )
     check_project_is_close(charity_project)
-    check_project_name(charity_project.name)
+    check_project_name_description(obj_in)
     if obj_in.name is not None:
         await check_project_name_duplicate(obj_in.name, session)
+    if obj_in.full_amount is not None:
+        check_full_great_invested(charity_project, obj_in.full_amount)
     charity_project = await charity_projects_crud.update(
         charity_project, obj_in, session
     )

@@ -48,16 +48,33 @@ async def check_charity_project_not_invested(
         )
 
 
-def check_project_name(name) -> None:
-    if name == '' or len(name) > 100:
+def check_project_name_description(project) -> None:
+    project_data = project.dict()
+    if 'name' in project_data.keys() and project_data['name'] is not None and (
+            project_data['name'] == '' or len(project_data['name']) > 100
+    ):
         raise HTTPException(
             status_code=422,
             detail='Недопустимое имя проекта!'
+        )
+    if ('description' in project_data.keys() and
+            (project_data['description'] == '')):
+        raise HTTPException(
+            status_code=422,
+            detail='Недопустимое описание проекта!'
         )
 
 
 def check_project_is_close(project) -> None:
     if project.fully_invested:
+        raise HTTPException(
+            status_code=400,
+            detail='Закрытый проект нельзя редактировать!'
+        )
+
+
+def check_full_great_invested(project, full_amount) -> None:
+    if project.invested_amount > full_amount:
         raise HTTPException(
             status_code=400,
             detail='Закрытый проект нельзя редактировать!'
