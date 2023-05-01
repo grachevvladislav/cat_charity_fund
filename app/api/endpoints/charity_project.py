@@ -12,6 +12,7 @@ from app.schemas.charity_project import (CharityProjectCreate,
 
 from ..validators import (check_charity_project_exists,
                           check_charity_project_not_invested,
+                          check_project_is_close, check_project_name,
                           check_project_name_duplicate)
 
 router = APIRouter()
@@ -39,7 +40,12 @@ async def create_new_charity_project(
         charity_project: CharityProjectCreate,
         session: AsyncSession = Depends(get_async_session),
 ):
-    """Только для суперюзеров."""
+    """
+    Только для суперюзеров.
+
+    Создает благотворительный проект.
+    """
+    check_project_name(charity_project.name)
     await check_project_name_duplicate(charity_project.name, session)
     new_charity_project = await charity_projects_crud.create(
         charity_project, session
@@ -50,14 +56,18 @@ async def create_new_charity_project(
 @router.delete(
     '/{charity_project_id}',
     response_model=CharityProjectDB,
-    response_model_exclude_none=True,
     dependencies=[Depends(current_superuser)],
 )
 async def remove_charity_project(
     charity_project_id: int,
     session: AsyncSession = Depends(get_async_session),
 ):
-    """Только для суперюзеров."""
+    """
+    Только для суперюзеров.
+
+    Удаляет проект. Нельзя удалить проект, в который уже были инвестированы
+    средства, его можно только закрыть.
+    """
     charity_project = await check_charity_project_exists(
         charity_project_id, session
     )
@@ -71,7 +81,6 @@ async def remove_charity_project(
 @router.patch(
     '/{charity_project_id}',
     response_model=CharityProjectDB,
-    response_model_exclude_none=True,
     dependencies=[Depends(current_superuser)],
 )
 async def partially_update_charity_project(
@@ -79,10 +88,17 @@ async def partially_update_charity_project(
         obj_in: CharityProjectUpdate,
         session: AsyncSession = Depends(get_async_session),
 ):
-    """Только для суперюзеров."""
+    """
+    Только для суперюзеров.
+
+    Закрытый проект нельзя редактировать, также нельзя установить требуемую
+    сумму меньше уже вложенной.
+    """
     charity_project = await check_charity_project_exists(
         charity_project_id, session
     )
+    check_project_is_close(charity_project)
+    check_project_name(charity_project.name)
     if obj_in.name is not None:
         await check_project_name_duplicate(obj_in.name, session)
     charity_project = await charity_projects_crud.update(
