@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, func, text, column, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
@@ -61,6 +61,27 @@ class CRUDCharityProjects(CRUDBase):
         )
         project_name_id = project_name_id.scalars().first()
         return project_name_id
+
+    async def get_projects_by_completion_rate(self,
+        session: AsyncSession,
+    ) -> list[dict[str, str]]:
+        projects = await session.execute(
+            select(
+                CharityProject.name,
+                CharityProject.description,
+                (
+                    func.julianday(CharityProject.close_date)
+                    - func.julianday(CharityProject.create_date)
+                ).label('collection_time')
+            ).where(
+                CharityProject.fully_invested == 1
+            ).order_by(
+                (func.julianday(CharityProject.close_date)
+                 - func.julianday(CharityProject.create_date)).desc()
+            )
+        )
+        projects = projects.all()
+        return projects
 
 
 charity_projects_crud = CRUDCharityProjects(CharityProject)
